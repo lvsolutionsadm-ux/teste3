@@ -1,0 +1,28 @@
+PÁGINA DE PIX EM PHP (BravoPay)
+================================
+
+Tem uma pasta para cada oferta:
+  checkout-of1  ->  R$ 33,60  (produto "Pagamento OF1")
+  checkout-of2  ->  R$ 28,80  (produto "Pagamento OF2")
+
+COMO INSTALAR
+1. Abra o arquivo config.php de cada pasta e troque
+   COLE_SUA_CHAVE_BRAVOPAY_AQUI pela sua chave da API da BravoPay (bp_live_...).
+2. Envie a pasta para a sua hospedagem, junto do site da oferta.
+   Você pode renomear a pasta (ex.: checkout-api).
+3. No botão de compra da oferta, aponte para a pasta:
+      <a href="checkout-of1/">Comprar</a>
+4. Para não perder as UTMs, o link precisa levar os parâmetros da página.
+   Se o script da UTMify estiver na página da oferta, ele já faz isso.
+
+O QUE PRECISA NA HOSPEDAGEM
+- PHP 7.4 ou mais novo, com a extensão cURL ativa (quase toda hospedagem tem).
+- O site precisa estar em https (para o botão de copiar funcionar em todos os celulares).
+
+PARA MUDAR ALGUMA COISA (tudo no config.php)
+- Valor:            amount_cents (em centavos: 3360 = R$ 33,60)
+- Produto BravoPay: product_id
+- Link depois do pagamento: redirect_url
+- Validade do PIX:  expires_in (em segundos)
+
+Nunca mande o config.php para ninguém: ele tem a sua chave da BravoPay.

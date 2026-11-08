@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="max-image-preview:large">
+    <title>Pagamento Urgente</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+    <script src="js/utm-handler.js" data-token="fc1a816b-aefa-4bef-8b92-fca75616a0e9" data-click-id-param="click_id"></script>
+  </head>
+  <body style="
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #00f2eb, #ff0552);
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    ">
+    <div style="
+        width: 90%;
+        max-width: 600px;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      ">
+      <div style="margin-bottom: 20px">
+        <img src="images/F09F92B8-emoji.png" alt="Logo" style="width: 100px">
+      </div>
+      <h2 style="font-size: 2rem; color: #04c500; margin-bottom: 15px">
+        Saque Solicitado com Sucesso!
+      </h2>
+      <p style="font-size: 1.1rem; color: #555; margin-bottom: 20px">
+        O seu saque será processado em até
+        <span style="color: #d9534f; font-weight: 700">7 DIAS ÚTEIS</span>.
+      </p>
+      <p style="font-size: 1.1rem; color: #555; margin-bottom: 20px">
+        Quer <strong>EVITAR A ESPERA</strong>? Antecipe e receba
+        <span style="color: #d9534f; font-weight: 700">IMEDIATAMENTE</span>
+        pagando apenas R$27,90!
+      </p>
+      <p style="
+          font-size: 1.2rem;
+          color: #ff0000;
+          font-weight: bold;
+          margin-top: 20px;
+        ">
+        Atenção: Oferta válida por tempo limitado!
+      </p>
+      <button onclick="redirectToPayment()" style="
+          background: #000000;
+          color: #fff;
+          border: none;
+          padding: 15px 20px;
+          font-size: 1rem;
+          font-weight: 700;
+          border-radius: 25px;
+          cursor: pointer;
+          transition: transform 0.3s ease, background 0.3s ease;
+          text-decoration: none;
+          display: inline-block;
+          animation: pulse 1s infinite;
+        ">
+        RECEBER AGORA
+      </button>
+      <style>
+        @keyframes pulse {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+        }
+      </style>
+    </div>
+
+    <script>
+      function redirectToPayment() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryString = urlParams.toString();
+        window.location.href = "https://www.pay-pagamentos.link/checkout/af5c176c-61f3-4ef1-9168-be7c617e04e8" + queryString;
+      }
+    </script>
+  
+
+</body></html>

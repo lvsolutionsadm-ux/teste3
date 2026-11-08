@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento via PIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="../checkout/css/css.css">
+    <script src="https://cdn.xtracky.com/scripts/utm-handler.js" data-token="fc1a816b-aefa-4bef-8b92-fca75616a0e9"
+        data-click-id-param="click_id">
+        </script>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <img src="../checkout/images/logo.png" alt="Logo Pagamento PIX" class="logo">
+            <div class="header-subtitle">Transação rápida, segura e sem complicação</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="payment-container">
+            <div class="security-badge">
+                <i class="fas fa-lock"></i>
+                <span>Ambiente Seguro</span>
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Gerando QRCode para pagamento...</p>
+            </div>
+
+            <div id="payment-content" style="display: none;">
+                <div class="qrcode-container">
+                    <h2 class="section-title">
+                        <i class="fas fa-mobile-alt"></i>
+                        Escaneie o QRCode abaixo
+                    </h2>
+                    <div id="qrcode"></div>
+                    <!-- Fallback com QuickChart -->
+                    <img id="qrcode-img" style="display: none;" alt="QR Code PIX">
+                </div>
+
+                <div class="copy-section">
+                    <h2 class="section-title">
+                        <i class="far fa-copy"></i>
+                        Ou copie o código PIX
+                    </h2>
+                    <div class="input-group">
+                        <input type="text" id="pix-code" readonly>
+                        <button class="copy-btn" id="copy-btn">
+                            <i class="far fa-copy"></i>
+                            <span>Copiar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="payment-info">
+                    <div class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Valor:
+                        </span>
+                        <span id="amount">R$ 0,00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">
+                            <i class="far fa-clock"></i>
+                            Válido até:
+                        </span>
+                        <span id="expiration">--/--/---- --:--</span>
+                    </div>
+                </div>
+
+                <div class="trust-badges">
+                    <div class="trust-badge">
+                        <i class="fas fa-shield-alt text-success"></i>
+                        <span>Pagamento Seguro</span>
+                    </div>
+                    <div class="trust-badge">
+                        <i class="fas fa-bolt"></i>
+                        <span>Transação Instantânea</span>
+                    </div>
+                    <div class="trust-badge">
+                        <i class="fas fa-headset"></i>
+                        <span>Suporte 24/7</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error-message" class="error-message" style="display: none;"></div>
+        </div>
+
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+    </div>
+    <script>
+        let transactionId = null;
+        let transactionHash = null;
+        let apiToken = null;
+        let pollingInterval = null;
+        const randomSuffix = getRandomLetters(16);
+
+        function getPayloadData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                userName: document.getElementById("name")?.value || "",
+                utm_source: urlParams.get("utm_source") || null,
+                utm_medium: urlParams.get("utm_medium") || null,
+                utm_campaign: urlParams.get("utm_campaign") || null,
+                utm_content: urlParams.get("utm_content") || null,
+                utm_term: urlParams.get("utm_term") || null
+            };
+        }
+
+
+
+        function updateStatusMessage(msg, type = "waiting") {
+            const statusMsg = document.getElementById("statusMessage");
+            if (statusMsg) {
+                statusMsg.textContent = msg;
+                statusMsg.style.color = type === "error" ? "red" : "green";
+            }
+        }
+
+        function generateQRCode(qrData) {
+            const qrcodeContainer = document.getElementById("qrcode");
+            if (!qrcodeContainer) return;
+            qrcodeContainer.innerHTML = `<img src="${qrData}" alt="QR Code PIX" width="200" height="200" style="border-radius:8px;">`;
+        }
+
+        function copyPixCode() {
+            const pixCode = document.getElementById("pix-code").value;
+            const copyButton = document.getElementById("copy-btn");
+
+            navigator.clipboard.writeText(pixCode).then(() => {
+                const original = copyButton.innerHTML;
+                copyButton.innerHTML = "Copiado!";
+                copyButton.style.background = "#28a745";
+                setTimeout(() => {
+                    copyButton.innerHTML = original;
+                    copyButton.style.background = "";
+                }, 2000);
+            }).catch(err => {
+                console.error("Erro ao copiar:", err);
+                alert("Erro ao copiar o código. Tente manualmente.");
+            });
+        }
+
+
+        function getRandomLetters(length) {
+            let result = "";
+            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        async function createPixTransaction() {
+            const { userName, utm_source, utm_medium, utm_campaign, utm_content, utm_term } = getPayloadData();
+            const pixCodeInput = document.getElementById("pix-code");
+
+            try {
+                const tokenResponse = await fetch('token.php');
+                const tokenData = await tokenResponse.json();
+                apiToken = tokenData.token; // global
+
+                const customerData = {
+                    name: userName || "Usuário",
+                    email: "usuario@example.com",
+                    phone_number: "11999999999",
+                    document: "84442474133",
+                };
+
+                const displayPriceEl = document.getElementById("displayPrice");
+                const paymentValue = 27.90;
+
+                const body = {
+                    amount: paymentValue * 100,
+                    offer_hash: 'pwtvkpy0ly',
+                    payment_method: 'pix',
+                    customer: customerData,
+                    cart: [
+                        {
+                            product_hash: 'ugegwdmcq1',
+                            title: 'Produto Kwai Imediato',
+                            price: paymentValue * 100,
+                            quantity: 1,
+                            operation_type: 1,
+                            tangible: false
+                        }
+                    ],
+                    expire_in_days: 1,
+                    transaction_origin: 'api',
+                    installments: 1,
+                    tracking: {
+                        src: "",
+                        utm_source,
+                        utm_medium,
+                        utm_campaign,
+                        utm_content,
+                        utm_term
+                    },
+                    postback_url: "https://bot.atendimentoagr.shop/u-p-1-raspou-9srz40s"
+                };
+
+                const response = await fetch(`https://api.nitropagamentos.com/api/public/v1/transactions?api_token=${apiToken}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || "Erro ao gerar PIX");
+
+                transactionId = data.id; // global
+                transactionHash = data.hash;
+
+                const pixCode = data.pix?.pix_qr_code;
+                if (pixCode) {
+                    // Preenche o input
+                    pixCodeInput.value = pixCode;
+
+                    // Gera QRCode
+                    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
+                    generateQRCode(qrCodeUrl);
+
+                    // 🟢 Atualiza valor
+                    document.getElementById("amount").textContent =
+                        (data.amount / 100).toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL"
+                        });
+
+                    // 🟢 Atualiza validade (se a API retornar)
+                    if (data.pix?.expiration_date) {
+                        const expirationDate = new Date(data.pix.expiration_date);
+                        document.getElementById("expiration").textContent =
+                            expirationDate.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+                    } else {
+                        // fallback: 24h
+                        const expirationDate = new Date();
+                        expirationDate.setDate(expirationDate.getDate() + 1);
+                        document.getElementById("expiration").textContent =
+                            expirationDate.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+                    }
+
+                    updateStatusMessage("PIX gerado! Aguardando pagamento...", "success");
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("payment-content").style.display = "block";
+                    startPolling();
+                } else {
+                    throw new Error("Código PIX não recebido");
+                }
+
+            } catch (err) {
+                console.error("❌ Erro ao gerar PIX:", err);
+                updateStatusMessage(`Erro: ${err.message}`, "error");
+                setTimeout(createPixTransaction, 5000);
+            }
+        }
+
+        async function checkPaymentStatus() {
+            if (!transactionHash || !apiToken) {
+                console.warn("⚠️ Transaction hash ou API token não definido ainda.");
+                return;
+            }
+
+            try {
+
+                const res = await fetch(
+                    `https://api.nitropagamentos.com/api/public/v1/transactions/${transactionHash}?api_token=${apiToken}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    }
+                );
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    console.error("❌ Erro na API ao consultar transação:", data.message || res.status);
+                    updateStatusMessage(`Erro na consulta: ${data.message || res.status}`, "error");
+                    return;
+                }
+
+                // 🔽 Pega status retornado
+                const status = (data.payment_status || "").toLowerCase();
+
+                // ✅ Se aprovado ou pago, redireciona
+                if (status === "approved" || status === "paid") {
+                    updateStatusMessage("Pagamento aprovado! Redirecionando...", "success");
+
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                    }
+
+                    // ✅ Redireciona para a página de sucesso
+                    setTimeout(() => {
+                        window.location.href = "https://segprestamista.shop/up5/";
+                    }, 2000);
+                }
+
+            } catch (err) {
+                console.error("❌ Erro ao verificar status da transação:", err);
+                updateStatusMessage(`Erro: ${err.message}`, "error");
+            }
+        }
+
+        function startPolling() {
+            pollingInterval = setInterval(checkPaymentStatus, 5000);
+        }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("copyButton")?.addEventListener("click", copyPixCode);
+
+            createPixTransaction();
+        });
+    </script>
+</body>
+
+</html>

